@@ -1,6 +1,11 @@
 package alec
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/gonum/matrix/mat64"
+)
+
+// Use gonum/matrix library for matrix addition, subtraction, mul, dot product, etc.
 
 type Alec struct {
 	hiddenLayers float32
