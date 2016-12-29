@@ -17,8 +17,10 @@ func NewAlec(bThresh float32, lRate float32, mMentum float32) *Alec { // This is
 	al := &Alec{
 		binaryThresh: bThresh,
 		learningRate: lRate,
-		momentum: mMentum
+		momentum: mMentum,
 	}
+
+	return al
 }
 // need some structs
 // need a constructor. something that instantiates an Alec
