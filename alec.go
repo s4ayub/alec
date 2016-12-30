@@ -8,20 +8,32 @@ import (
 // Use gonum/matrix library for matrix addition, subtraction, mul, dot product, etc.
 
 type Alec struct {
-	binaryThresh float32
-	learningRate float32
-	momentum float32
+	BinaryThresh float32
+	LearningRate float32
+	Momentum float32
+	Sizes int
+	OutputLayer int
+	Biases
+	Weights
+	Outputs
+	Deltas
+	Changes
+	Errors
 }
 
 func NewAlec(bThresh float32, lRate float32, mMentum float32) *Alec { // This is my constructor to instantiate an Alec
 	al := &Alec{
-		binaryThresh: bThresh,
-		learningRate: lRate,
-		momentum: mMentum,
+		BinaryThresh: bThresh,
+		LearningRate: lRate,
+		Momentum: mMentum,
 	}
+
+	biases ....
+	weights ....
 
 	return al
 }
+
 // need some structs
 // need a constructor. something that instantiates an Alec
 // need a training function, that takes the options of learning rate, and number of hidden layers
