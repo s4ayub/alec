@@ -11,28 +11,31 @@ type Alec struct {
 	BinaryThresh float32
 	LearningRate float32
 	Momentum float32
-	Sizes int
+	Sizes []int
 	OutputLayer int
-	Biases
-	Weights
-	Outputs
-	Deltas
-	Changes
-	Errors
+	Biases []int
+	Weights []int
+	Outputs []int
+	Deltas []int
+	Changes []int
+	Errors []int
 }
 
-func NewAlec(bThresh float32, lRate float32, mMentum float32) *Alec { // This is my constructor to instantiate an Alec
-	al := &Alec{
-		BinaryThresh: bThresh,
-		LearningRate: lRate,
-		Momentum: mMentum,
+func (a Alec, mMentum float32, lRate float32, bThresh float32, sizers []int) { // This constructs the neural network
+	a.BinaryThresh = bThresh
+	a.LearningRate = lRate
+	a.Momentum = mMentum
+	a.sizes = sizers
+	a.OutputLayer = len(a.sizes)
+
+	for layer:= 0; layer < a.OutputLayer; layer++ {
+		layer_size := a.sizes[layer]
+		a.Deltas[layer] = zeros(layer_size)
+		a.Errors[layer] = zeros(layer_size)
+		a.Outputs[layer] = zeros(layer_size)
 	}
 
-	biases ....
-	weights ....
-
-	return al
-}
+}+
 
 // need some structs
 // need a constructor. something that instantiates an Alec
