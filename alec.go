@@ -13,12 +13,12 @@ type Alec struct {
 	Momentum float32
 	Sizes []int
 	OutputLayer int
-	Biases []int
-	Weights []int
-	Outputs []int
-	Deltas []int
-	Changes []int
-	Errors []int
+	Biases [][]int
+	Weights [][]int
+	Outputs [][]int
+	Deltas [][]int
+	Changes [][]int
+	Errors [][]int
 }
 
 func (a Alec, mMentum float32, lRate float32, bThresh float32, sizers []int) { // This constructs the neural network
@@ -33,6 +33,8 @@ func (a Alec, mMentum float32, lRate float32, bThresh float32, sizers []int) { /
 		a.Deltas[layer] = zeros(layer_size)
 		a.Errors[layer] = zeros(layer_size)
 		a.Outputs[layer] = zeros(layer_size)
+
+		if layer > 0
 	}
 
 }+
