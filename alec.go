@@ -11,33 +11,58 @@ type Alec struct {
 	BinaryThresh float32
 	LearningRate float32
 	Momentum float32
+	HiddenSizes []int
 	Sizes []int
 	OutputLayer int
 	Biases [][]int
-	Weights [][]int
+	Weights [][][]float32 // This is a 3D slice
 	Outputs [][]int
 	Deltas [][]int
-	Changes [][]int
+	Changes [][][]int // This is a 3D slice
 	Errors [][]int
 }
 
-func (a Alec, mMentum float32, lRate float32, bThresh float32, sizers []int) { // This constructs the neural network
+func MakeAlec(mMentum float32, lRate float32, bThresh float32, sizers []int) Alec { // This constructs the neural network
+	a := Alec{}
 	a.BinaryThresh = bThresh
 	a.LearningRate = lRate
 	a.Momentum = mMentum
-	a.sizes = sizers
-	a.OutputLayer = len(a.sizes)
 
+	a.Sizes = sizers // This array carries the amount of neurons at each layer
+	a.OutputLayer = len(a.Sizes) - 1
+
+	// Initialize all the slices
+	a.Biases = make([][]int, len(a.Sizes))
+	a.Weights = make([][][]float32, len(a.Sizes))
+	a.Outputs = make([][]int, len(a.Sizes))
+
+	// For training
+	a.Deltas = make([][]int, len(a.Sizes))
+	a.Changes = make([][][]int, len(a.Sizes))
+	a.Errors = make([][]int, len(a.Sizes))
+	
 	for layer:= 0; layer < a.OutputLayer; layer++ {
-		layer_size := a.sizes[layer]
-		a.Deltas[layer] = zeros(layer_size)
-		a.Errors[layer] = zeros(layer_size)
-		a.Outputs[layer] = zeros(layer_size)
+		layerSize := a.Sizes[layer]
 
-		if layer > 0
+		// Make an array of 0s at each layer
+		a.Deltas[layer] = make([]int, layerSize)
+		a.Errors[layer] = make([]int, layerSize)
+		a.Outputs[layer] = make([]int, layerSize)
+
+		if (layer > 0) {
+			a.Biases[layer] = randos(layerSize) // Returns an array of random numbers
+			a.Weights[layer] = make([][]float32, layerSize)
+			a.Changes[layer] = make([][]int, layerSize)
+
+			for node := 0; node < layerSize; node++ {
+				prevSize := a.Sizes[layer - 1]
+				a.Weights[layer][node] = randos(prevSize)
+				a.Changes[layer][node] = make([]int, prevSize)
+			}
+		}
 	}
-
-}+
+	return a
+}
 
 // need some structs
 // need a constructor. something that instantiates an Alec
