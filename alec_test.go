@@ -2,9 +2,9 @@ package alec_test
 
 import (
 	"fmt"
-	"math"
 	"testing"
 	"github.com/s4ayub/alec"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNOR(t *testing.T) {
