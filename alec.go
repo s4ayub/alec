@@ -77,6 +77,8 @@ func SigmoidActivate(m *mat64.Dense) *mat64.Dense {
 			activatedMatrix.Set(row, col, Sigmoid(neuronValue))
 		}
 	}
+
+	return activatedMatrix 
 }
 
 func SigmoidPrimeActivate(m *mat64.Dense) *mat64.Dense {
@@ -89,11 +91,12 @@ func SigmoidPrimeActivate(m *mat64.Dense) *mat64.Dense {
 			activatedMatrix.Set(row, col, SigmoidPrime(neuronValue))
 		}
 	}
+
+	return activatedMatrix
 }
 
 // Helper function to use forward propagation on the network
 func ForwardPropagate(a *Alec, inputMatrix *mat64.Dense) {
-
 	// Propagating from input layer to hidden layer
 	HiddenNeuronSum := mat64.Dense{}
 	HiddenNeuronSum.Mul(inputMatrix, a.InputSynapses) // Matrix multiply input data through the weights
@@ -108,9 +111,26 @@ func ForwardPropagate(a *Alec, inputMatrix *mat64.Dense) {
 	a.NeuronOutputSum = NeuronOutputSum
 }
 
-func BackwardPropagate(a *Alec, inputMatrix *mat64.Dense, outputMatrix *mat64.Dense) {
-	
-	
+func BackPropagate(a *Alec, inputMatrix *mat64.Dense, outputMatrix *mat64.Dense) {
+	OutputLayerError, OutputLayerDelta, := &mat64.Dense{}, &mat64.Dense{}
+	InputHiddenChanges, OutputHiddenChanges := &mat64.Dense{}, &mat64.Dense{}
+	HiddenLayerDelta := &mat64.Dense{}
+
+	// Matrix subtraction between training data and network's output results to get error margin
+	OutputLayerError.Sub(outputMatrix, m.NeuronOutputResults) 
+
+	// Adjusting synapses and neurons from output layer to hidden layer
+	OutputLayerDelta.MulElem(SigmoidPrimeActivate(a.NeuronOutputSum), OutputLayerError)
+	OutputHiddenChanges.Mul(a.HiddenNeuronResults.T(), OutputLayerDelta) // T() transposes a matrix
+	OutputHiddenChanges.Scale(a.LearningRate, OutputHiddenChanges) // Multiply matrix by a scaler
+	a.OutputSynapses.Add(OutputHiddenChanges, a.OutputSynapses)
+
+	// Adjusting synapses and neurons from hidden layer to input layer
+	HiddenLayerDelta.Mul(OutputLayerDelta, a.OutputSynapses.T())
+	HiddenLayerDelta.MulElem(SigmoidPrimeActivate(a.HiddenNeuronSum), HiddenLayerDelta)
+	InputHiddenChanges.Mul(inputMatrix.T(), HiddenLayerDelta)
+	InputHiddenChanges.Scale(a.LearningRate, InputHiddenChanges)
+	a.InputSynapses.Add(InputHiddenChanges, a.InputSynapses)
 }
 
 // Initialize the network
@@ -120,7 +140,6 @@ func Build(learningRate float64, iterations int, hiddenNeurons int) *Alec { // R
 	a.NumOfIterations = iterations
 	a.HiddenNeurons = hiddenNeurons
 }
-
 
 func Train(a *Alec, trainingData [][][]float64) { // Training data is in the form of a 3D array
 	inputMatrix, outputMatrix := Scrape(trainingData)
@@ -136,8 +155,12 @@ func Train(a *Alec, trainingData [][][]float64) { // Training data is in the for
 	// Training network with forward and back propagation
 	for i:=0; i<m.NumOfIterations; i++ {
 		m.ForwardPropagate(inputMatrix)
-		m.BackwardPropagate(inputMatrix, outputMatrix)
+		m.BackPropagate(inputMatrix, outputMatrix)
 	}
+}
+
+func Smart() {
+	
 }
 
 
