@@ -1,0 +1,83 @@
+package alec
+
+import (
+	"fmt"
+	"github.com/gonum/matrix/mat64"
+)
+
+// Use gonum/matrix library for matrix addition, subtraction, mul, dot product, etc.
+
+type Alec struct {
+	BinaryThresh float32
+	LearningRate float32
+	Momentum float32
+	HiddenSizes []int
+	Sizes []int
+	OutputLayer int
+	Biases [][]int
+	Weights [][][]float32 // This is a 3D slice
+	Outputs [][]int
+	Deltas [][]int
+	Changes [][][]int // This is a 3D slice
+	Errors [][]int
+}
+
+func MakeAlec(mMentum float32, lRate float32, bThresh float32, sizers []int) Alec { // This constructs the neural network
+	a := Alec{}
+	a.BinaryThresh = bThresh
+	a.LearningRate = lRate
+	a.Momentum = mMentum
+
+	a.Sizes = sizers // This array carries the amount of neurons at each layer
+	a.OutputLayer = len(a.Sizes) - 1
+
+	// Initialize all the slices
+	a.Biases = make([][]int, len(a.Sizes))
+	a.Weights = make([][][]float32, len(a.Sizes))
+	a.Outputs = make([][]int, len(a.Sizes))
+
+	// For training
+	a.Deltas = make([][]int, len(a.Sizes))
+	a.Changes = make([][][]int, len(a.Sizes))
+	a.Errors = make([][]int, len(a.Sizes))
+	
+	for layer:= 0; layer < a.OutputLayer; layer++ {
+		layerSize := a.Sizes[layer]
+
+		// Make an array of 0s at each layer
+		a.Deltas[layer] = make([]int, layerSize)
+		a.Errors[layer] = make([]int, layerSize)
+		a.Outputs[layer] = make([]int, layerSize)
+
+		if (layer > 0) {
+			a.Biases[layer] = randos(layerSize) // Returns an array of random numbers
+			a.Weights[layer] = make([][]float32, layerSize)
+			a.Changes[layer] = make([][]int, layerSize)
+
+			for node := 0; node < layerSize; node++ {
+				prevSize := a.Sizes[layer - 1]
+				a.Weights[layer][node] = randos(prevSize)
+				a.Changes[layer][node] = make([]int, prevSize)
+			}
+		}
+	}
+	return a
+}
+
+func train(trainingDate [][][]float64, interations int, )  {
+
+}
+
+// need some structs
+// need a constructor. something that instantiates an Alec
+// need a training function, that takes the options of learning rate, and number of hidden layers
+// need forward propagation
+// need back propagation
+// need prediction
+
+// 	hiddenLayers float32
+// 	learningRate float32
+// 	iterations float32
+// 	hiddenNeurons float32
+
+// A bias allows you to shift the activation function left or right

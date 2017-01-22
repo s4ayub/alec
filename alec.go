@@ -2,78 +2,147 @@ package alec
 
 import (
 	"fmt"
+	"math"
+	"math/rand"
+	"time"
 	"github.com/gonum/matrix/mat64"
 )
 
 // Use gonum/matrix library for matrix addition, subtraction, mul, dot product, etc.
+// mat64.Dense is in the form of a matrix
 
 type Alec struct {
-	BinaryThresh float32
-	LearningRate float32
-	Momentum float32
-	HiddenSizes []int
-	Sizes []int
-	OutputLayer int
-	Biases [][]int
-	Weights [][][]float32 // This is a 3D slice
-	Outputs [][]int
-	Deltas [][]int
-	Changes [][][]int // This is a 3D slice
-	Errors [][]int
+	LearningRate float64
+	NumOfIterations int
+	HiddenNeurons int
+	InputSynapses *mat64.Dense // Connections between neurons
+	OutputSynapses *mat64.Dense // Connections between neurons
+	HiddenNeuronSum *mat64.Dense // Sums and results coming in and out of each neuron
+	HiddenNeuronResults *mat64.Dense 
+	NeuronOutputSum *mat64.Dense 
+	NeuronOutputResults *mat64.Dense 
 }
 
-func MakeAlec(mMentum float32, lRate float32, bThresh float32, sizers []int) Alec { // This constructs the neural network
-	a := Alec{}
-	a.BinaryThresh = bThresh
-	a.LearningRate = lRate
-	a.Momentum = mMentum
+// Helper to grab data from the 3D array of training data
+func Scrape(trainingData [][][]float64) (*mat64.Dense, *mat64.Dense) { // Training data is in the form of a 3D array
+	var inputData, outputData []float64 // Slices of the input and output data
 
-	a.Sizes = sizers // This array carries the amount of neurons at each layer
-	a.OutputLayer = len(a.Sizes) - 1
+	numOfRows := len(trainingData) // This is the length of the outer array
+	inputColumns := len(trainingData[0][0]) // Length of the input columns
+	outputColumns := len(trainingData[0][1]) // Length of output columns, all the inputs and outputs will share this length
 
-	// Initialize all the slices
-	a.Biases = make([][]int, len(a.Sizes))
-	a.Weights = make([][][]float32, len(a.Sizes))
-	a.Outputs = make([][]int, len(a.Sizes))
+	for _, dataSet := range trainingData { // Blank identifier allows me to drop the first return value (think key, value for loops in python) 
+		inputData = append(inputData, dataSet[0]...) // The ... is the syntax for appending one slice to another
+		outputData = append(outputData, dataSet[1]...) 
+	}
 
-	// For training
-	a.Deltas = make([][]int, len(a.Sizes))
-	a.Changes = make([][][]int, len(a.Sizes))
-	a.Errors = make([][]int, len(a.Sizes))
+	inputMatrix := mat64.NewDense(numOfRows, inputColumns, inputData)
+	outputMatrix := mat64.NewDense(numOfRows, outputColumns, outputData)
 	
-	for layer:= 0; layer < a.OutputLayer; layer++ {
-		layerSize := a.Sizes[layer]
+	return inputMatrix, outputMatrix
+}
 
-		// Make an array of 0s at each layer
-		a.Deltas[layer] = make([]int, layerSize)
-		a.Errors[layer] = make([]int, layerSize)
-		a.Outputs[layer] = make([]int, layerSize)
+// Helper to randomize weights of synapses
+func Randoms(rows, columns, int) *mat64.Dense {
+	rand.Seed(time.Now().UTC().UnixNano()) // Set the starting point for a random number generator
+	randomMatrix := mat64.NewDense(rows, cols, nil) 
 
-		if (layer > 0) {
-			a.Biases[layer] = randos(layerSize) // Returns an array of random numbers
-			a.Weights[layer] = make([][]float32, layerSize)
-			a.Changes[layer] = make([][]int, layerSize)
-
-			for node := 0; node < layerSize; node++ {
-				prevSize := a.Sizes[layer - 1]
-				a.Weights[layer][node] = randos(prevSize)
-				a.Changes[layer][node] = make([]int, prevSize)
-			}
+	for row:=0, i<rows; row++ {
+		for col:=0; j<columns; col++ {
+			randomMatrix.set(row, col, rand.NormFloat64)
 		}
 	}
-	return a
+
+	return randomMatrix
 }
 
-// need some structs
-// need a constructor. something that instantiates an Alec
-// need a training function, that takes the options of learning rate, and number of hidden layers
-// need forward propagation
-// need back propagation
-// need prediction
+// Helper function that applies the sigmoid function to a value
+func Sigmoid(value float64) float64 {
+	return 1 / ( 1 + math.Exp(-value) )
+}
 
-	// hiddenLayers float32
-	// learningRate float32
-	// iterations float32
-	// hiddenNeurons float32
+// Helper function that applies the derivative of the sigmiod function to a value
+func SigmoidPrime(value float64) float64 {
+	return Sigmoid(value) * (1 - Sigmoid(value))
+}
 
-// A bias allows you to shift the activation function left or right
+// Activation function -> currently only uses sigmoid function
+func SigmoidActivate(m *mat64.Dense) *mat64.Dense {
+	rows, columns := m.Dims()
+	activatedMatrix := mat64.NewDense(rows, cols, nil)
+
+	for row:=0; row<rows; row++ {
+		for col:=0; col<columns; col++ {
+			neuronValue := m.At(row, col)
+			activatedMatrix.Set(row, col, Sigmoid(neuronValue))
+		}
+	}
+}
+
+func SigmoidPrimeActivate(m *mat64.Dense) *mat64.Dense {
+	rows, columns := m.Dims()
+	activatedMatrix := mat64.NewDense(rows, cols, nil)
+
+	for row:=0; row<rows; row++ {
+		for col:=0; col<columns; col++ {
+			neuronValue := m.At(row, col)
+			activatedMatrix.Set(row, col, SigmoidPrime(neuronValue))
+		}
+	}
+}
+
+// Helper function to use forward propagation on the network
+func ForwardPropagate(a *Alec, inputMatrix *mat64.Dense) {
+
+	// Propagating from input layer to hidden layer
+	HiddenNeuronSum := mat64.Dense{}
+	HiddenNeuronSum.Mul(inputMatrix, a.InputSynapses) // Matrix multiply input data through the weights
+	a.HiddenNeuronResults = SigmoidActivate(HiddenNeuronSum) // Apply sigmoid activation function to sum at each layer
+	
+	// Propagating from hidden layer to output layer
+	NeuronOutputSum := &mat64.Dense{}
+	NeuronOutputSum.Mul(a.HiddenNeuronResults, a.OutputSynapses)
+	a.NeuronOutputResults = SigmoidActivate(NeuronOutputSum)
+
+	a.HiddenNeuronSum = HiddenNeuronSum
+	a.NeuronOutputSum = NeuronOutputSum
+}
+
+func BackwardPropagate(a *Alec, inputMatrix *mat64.Dense, outputMatrix *mat64.Dense) {
+	
+	
+}
+
+// Initialize the network
+func Build(learningRate float64, iterations int, hiddenNeurons int) *Alec { // Returns a pointer to Alec struct
+	a := &Alec{}
+	a.LearningRate = learningRate
+	a.NumOfIterations = iterations
+	a.HiddenNeurons = hiddenNeurons
+}
+
+
+func Train(a *Alec, trainingData [][][]float64) { // Training data is in the form of a 3D array
+	inputMatrix, outputMatrix := Scrape(trainingData)
+
+	// We only need the number of columns because those represent the amount of layers at each level, in this case, input and output
+	_, numInputColumns := inputMatrix.Dims() // Returns number of rows and cols in a matrix
+	_, numOutputColumns := outputMatrix.Dims()
+
+	// Prep our synapses matrixes 
+	a.InputSynapses = Randoms(numInputColumns, a.HiddenNeurons) // Randoms gives each synapse a random weight
+	a.OutputSynapses = Randoms(a.HiddenNeurons, numOutputColumns) //
+
+	// Training network with forward and back propagation
+	for i:=0; i<m.NumOfIterations; i++ {
+		m.ForwardPropagate(inputMatrix)
+		m.BackwardPropagate(inputMatrix, outputMatrix)
+	}
+}
+
+
+
+
+
+
+
