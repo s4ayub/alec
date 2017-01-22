@@ -1,12 +1,13 @@
-# language: go
+language: go
 
-# install:
-#   - go get github.com/s4ayub/alec
-#   - go get github.com/gonum/matrix/mat64
-#   - go get github.com/stretchr/testify/assert
+install:
+  - go get github.com/s4ayub/alec
+  - go get github.com/gonum/matrix/mat64
+  - go get github.com/stretchr/testify/assert
 
-# go:
-#   - 1.6
-#   - 1.7
-#   - master
+go:
+  - 1.6
+  - 1.7
+  - master
 
+script: go test ./...

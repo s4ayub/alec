@@ -1,3 +1,4 @@
+// Basic neural network 
 package alec
 
 import (
@@ -163,7 +164,7 @@ func (a *Alec) Train(trainingData [][][]float64) { // Training data is in the fo
 	}
 }
 
-// Ask a smart alec!
+// Ask a smart alec! This function allows you to make a prediction
 func (a *Alec) Smart(inputData [][]float64) *mat64.Dense {
 	var input []float64
 
