@@ -31,7 +31,7 @@ func TestXOR(t *testing.T) {
 	assert.Equal(t, a.HiddenNeurons, 5, "Number of hidden neurons should be this value")
 	assert.Equal(t, a.NumOfIterations, 50000, "Number of iterations should be this number")
 
-	a.Train([][][]float64{ // NOR truth table
+	a.Train([][][]float64{ // XOR truth table
 		{{0, 0}, {0}},
 		{{0, 1}, {1}},
 		{{1, 0}, {1}},
