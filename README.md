@@ -14,19 +14,21 @@ import (
 	"github.com/stevenmiller888/go-mind"
 }
 
-// An alec instance with a learning rate of 0.2, 1,000,000 iterations and 10 units in hidden layer
-a := alec.Build(0.2, 1000000, 10) 
+func main() {
+	// An alec instance with a learning rate of 0.2, 1,000,000 iterations and 10 units in hidden layer
+	a := alec.Build(0.2, 1000000, 10) 
 
-a.Train([][][]float64{ // XOR truth table
-	{{0, 0}, {0}},
-	{{0, 1}, {1}},
-	{{1, 0}, {1}},
-	{{1, 1}, {0}},
-})
-	
-input := [][]float64{{0, 0}}
-guess := a.Smart(input)
-fmt.Println("XOR TEST: ", guess.At(0, 0))
+	a.Train([][][]float64{ // XOR truth table
+		{{0, 0}, {0}},
+		{{0, 1}, {1}},
+		{{1, 0}, {1}},
+		{{1, 1}, {0}},
+	})
+
+	input := [][]float64{{0, 0}}
+	guess := a.Smart(input)
+	fmt.Println("XOR TEST: ", guess.At(0, 0))
+}
 ```
 ## Correctness
 A 65.2% correctness was determined for the network when approximating sin(x). This test can be found within the comments of "alec_test.go". Improvements could be made with the amount of training data provided. Also, only the sigmoid activation function is used which may not be the best for training for this purpose. For example, when determing correctness with XOR truth table predictions, the correctness would be 95%+ yet, this is not an accurate representation of the true correctness of the network.
