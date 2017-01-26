@@ -1,5 +1,5 @@
 # alec
-Neural Network implementation in Go - Package information: https://godoc.org/github.com/s4ayub/alec
+Neural Network implementation in Go - Documentation: https://godoc.org/github.com/s4ayub/alec
 
 [![Build Status](https://travis-ci.org/s4ayub/alec.svg?branch=master)](https://travis-ci.org/s4ayub/alec)
 
