@@ -46,5 +46,4 @@ Learning Material:
 The following repositories were referenced as well:
 - [mind](https://github.com/stevenmiller888/mind)
 - [cerebrum](https://github.com/irfansharif/cerebrum)
-- [go-mind](https://github.com/harthur-org/brain.js)
 - [brain js](https://github.com/harthur/brain)
