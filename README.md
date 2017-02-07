@@ -39,7 +39,7 @@ A 65.2% correctness was determined for the network when approximating sin(x). Th
 - Implement custom error threshold to facilitate more custom training
 
 ## References
-Learning Material:
+Reading Material:
 - [How to Build a Neural Network](http://stevenmiller888.github.io/mind-how-to-build-a-neural-network/)
 - [Neural Networks Demystified](https://www.youtube.com/watch?v=bxe2T-V8XRs)
 
