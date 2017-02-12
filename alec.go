@@ -12,7 +12,7 @@ import (
 // mat64.Dense is in the form of a matrix
 
 type Alec struct {
-	LearningRate float64
+	LearningRate float64 
 	NumOfIterations int
 	HiddenNeurons int
 	InputSynapses *mat64.Dense // Connections between neurons
@@ -22,6 +22,7 @@ type Alec struct {
 	NeuronOutputSum *mat64.Dense 
 	NeuronOutputResults *mat64.Dense 
 }
+
 
 // Helper to grab data from the 3D array of training data
 func Scrape(trainingData [][][]float64) (*mat64.Dense, *mat64.Dense) { // Training data is in the form of a 3D array
@@ -42,6 +43,7 @@ func Scrape(trainingData [][][]float64) (*mat64.Dense, *mat64.Dense) { // Traini
 	return inputMatrix, outputMatrix
 }
 
+
 // Helper to randomize weights of synapses
 func Randoms(rows, columns int) *mat64.Dense {
 	rand.Seed(time.Now().UTC().UnixNano()) // Set the starting point for a random number generator
@@ -56,6 +58,7 @@ func Randoms(rows, columns int) *mat64.Dense {
 	return randomMatrix
 }
 
+
 // Helper function that applies the sigmoid function to a value
 func Sigmoid(value float64) float64 {
 	return 1 / ( 1 + math.Exp(-value) )
@@ -65,6 +68,7 @@ func Sigmoid(value float64) float64 {
 func SigmoidPrime(value float64) float64 {
 	return Sigmoid(value) * (1 - Sigmoid(value))
 }
+
 
 // Activation function -> currently only uses sigmoid function
 func SigmoidActivate(m *mat64.Dense) *mat64.Dense {
@@ -81,6 +85,7 @@ func SigmoidActivate(m *mat64.Dense) *mat64.Dense {
 	return activatedMatrix 
 }
 
+
 func SigmoidPrimeActivate(m *mat64.Dense) *mat64.Dense {
 	rows, columns := m.Dims()
 	activatedMatrix := mat64.NewDense(rows, columns, nil)
@@ -95,6 +100,7 @@ func SigmoidPrimeActivate(m *mat64.Dense) *mat64.Dense {
 	return activatedMatrix
 }
 
+
 // Helper function to use forward propagation on the network
 func (a *Alec) ForwardPropagate(inputMatrix *mat64.Dense) {
 	// Propagating from input layer to hidden layer
@@ -107,15 +113,18 @@ func (a *Alec) ForwardPropagate(inputMatrix *mat64.Dense) {
 	NeuronOutputSum.Mul(a.HiddenNeuronResults, a.OutputSynapses)
 	a.NeuronOutputResults = SigmoidActivate(NeuronOutputSum)
 
-	a.HiddenNeuronSum = HiddenNeuronSum
+	a.HiddenNeuronSum = HiddenNeuronSum // Keeping track of the sums, before activation function at each neuron
 	a.NeuronOutputSum = NeuronOutputSum
 }
 
+
 func (a *Alec) BackPropagate(inputMatrix *mat64.Dense, outputMatrix *mat64.Dense) {
-	OutputLayerError := &mat64.Dense{}
-	OutputLayerDelta := &mat64.Dense{}
-	InputHiddenChanges := &mat64.Dense{}
-	OutputHiddenChanges := &mat64.Dense{}
+	OutputLayerError := &mat64.Dense{} // Margin of error between actual and predicted results
+	OutputLayerDelta := &mat64.Dense{} // The amount that we have to step back
+
+	InputHiddenChanges := &mat64.Dense{} // Extract the change in each weight from input layer to hidden layer
+	OutputHiddenChanges := &mat64.Dense{} // Extract the change in each weight from output layer to hidden layer
+
 	HiddenLayerDelta := &mat64.Dense{}
 
 	// Matrix subtraction between training data and network's output results to get error margin
@@ -135,6 +144,7 @@ func (a *Alec) BackPropagate(inputMatrix *mat64.Dense, outputMatrix *mat64.Dense
 	a.InputSynapses.Add(InputHiddenChanges, a.InputSynapses)
 }
 
+
 // Initialize the network
 func Build(learningRate float64, iterations int, hiddenNeurons int) *Alec { // Returns a pointer to Alec struct
 	a := &Alec{}
@@ -145,6 +155,7 @@ func Build(learningRate float64, iterations int, hiddenNeurons int) *Alec { // R
 
 	return a
 }
+
 
 func (a *Alec) Train(trainingData [][][]float64) { // Training data is in the form of a 3D array
 	inputMatrix, outputMatrix := Scrape(trainingData)
@@ -163,6 +174,7 @@ func (a *Alec) Train(trainingData [][][]float64) { // Training data is in the fo
 		a.BackPropagate(inputMatrix, outputMatrix)
 	}
 }
+
 
 // Ask a smart alec! This function allows you to make a prediction
 func (a *Alec) Smart(inputData [][]float64) *mat64.Dense {
