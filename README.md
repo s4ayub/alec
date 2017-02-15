@@ -26,7 +26,7 @@ func main() {
 	})
 
 	input := [][]float64{{0, 0}}
-	guess := a.Smart(input)
+	guess := a.Predict(input)
 	fmt.Println("XOR TEST: ", guess.At(0, 0))
 }
 ```
