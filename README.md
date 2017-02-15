@@ -11,7 +11,7 @@ This neural network currently allows users to specify a learning rate, the numbe
 ```go
 import (
 	"fmt"
-	"github.com/stevenmiller888/go-mind"
+	"github.com/s4ayub/alec"
 }
 
 func main() {
