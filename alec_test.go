@@ -2,9 +2,9 @@ package alec_test
 
 import (
 	"fmt"
-	"testing"
 	"github.com/s4ayub/alec"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestNOR(t *testing.T) {
@@ -19,9 +19,9 @@ func TestNOR(t *testing.T) {
 		{{1, 0}, {0}},
 		{{1, 1}, {0}},
 	})
-	
+
 	input := [][]float64{{0, 0}}
-	guess := a.Smart(input)
+	guess := a.Predict(input)
 	fmt.Println("NOR Test: ", guess.At(0, 0))
 }
 
@@ -37,21 +37,22 @@ func TestXOR(t *testing.T) {
 		{{1, 0}, {1}},
 		{{1, 1}, {0}},
 	})
-	
+
 	input := [][]float64{{0, 0}}
-	guess := a.Smart(input)
+	guess := a.Predict(input)
 	fmt.Println("XOR TEST: ", guess.At(0, 0))
 }
 
 // Uncomment the following if you want to see it approxiamate the sine function between 0 -> 3.14
 // func TestSIN(t *testing.T) {
-// 	a := alec.Build(0.01, 1000000, 20)
+// 	a := alec.Build(0.01, 10000, 20)
+
 // 	// assert.Equal(t, a.LearningRate, 0.05, "Learning rate should be this value")
 // 	// assert.Equal(t, a.HiddenNeurons, 15, "Number of hidden neurons should be this value")
 // 	// assert.Equal(t, a.NumOfIterations, 100000, "Number of iterations should be this number")
 
 // 	a.Train([][][]float64{ // NOR truth table
-// 		{{0}, {math.Sin(0)}}, // o to pi from here
+// 		{{0}, {math.Sin(0)}}, // 0 to pi from here
 // 		{{0.523599}, {math.Sin(0.523599)}},
 // 		{{0.785398}, {math.Sin(0.785398)}},
 // 		{{1.0472}, {math.Sin(1.0472)}},
@@ -81,19 +82,19 @@ func TestXOR(t *testing.T) {
 // 		{{2.9}, {math.Sin(2.9)}},
 // 		{{3.0}, {math.Sin(3.0)}},
 // 	})
-	
+
 // 	numCorrect := 0.00
 // 	set := 314.00
 // 	var difference float64
 
-// 	for i:=0.00; i<3.14; i+=0.01{ 
+// 	for i := 0.00; i < 3.14; i += 0.01 {
 // 		input := [][]float64{{i}}
-// 		guess := a.Smart(input)
+// 		guess := a.Predict(input)
 
-// 		fmt.Println("guess: ", guess.At(0,0), "real: ", math.Sin(i))
-// 		difference = math.Abs(guess.At(0,0)-math.Sin(i))
+// 		fmt.Println("guess: ", guess.At(0, 0), "real: ", math.Sin(i))
+// 		difference = math.Abs(guess.At(0, 0) - math.Sin(i))
 // 		// a neural network is correct when it consistently satisfies the parameters of it's design, in this case, 0.05 error margin when approximating values of sign
-// 		if difference <= 0.05 { 
+// 		if difference <= 0.05 {
 // 			numCorrect += 1.00
 // 			fmt.Println("True")
 // 		}
@@ -101,7 +102,7 @@ func TestXOR(t *testing.T) {
 // 	}
 
 // 	var percentCorrect float64
-// 	percentCorrect = numCorrect/set
+// 	percentCorrect = numCorrect / set
 // 	fmt.Println("numcorrect:", numCorrect)
 // 	fmt.Println("SIN TEST correctness: ", percentCorrect)
 // }

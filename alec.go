@@ -1,53 +1,51 @@
-// Basic neural network 
+// Basic neural network
 package alec
 
 import (
+	"github.com/gonum/matrix/mat64"
 	"math"
 	"math/rand"
 	"time"
-	"github.com/gonum/matrix/mat64"
 )
 
 // Use gonum/matrix library for matrix addition, subtraction, mul, dot product, etc.
 // mat64.Dense is in the form of a matrix
 
 type Alec struct {
-	LearningRate float64 
-	NumOfIterations int
-	HiddenNeurons int
-	InputSynapses *mat64.Dense // Connections between neurons
-	OutputSynapses *mat64.Dense // Connections between neurons
-	HiddenNeuronSum *mat64.Dense // Sums and results coming in and out of each neuron
-	HiddenNeuronResults *mat64.Dense 
-	NeuronOutputSum *mat64.Dense 
-	NeuronOutputResults *mat64.Dense 
+	LearningRate        float64
+	NumOfIterations     int
+	HiddenNeurons       int
+	InputSynapses       *mat64.Dense // Connections between neurons
+	OutputSynapses      *mat64.Dense // Connections between neurons
+	HiddenNeuronSum     *mat64.Dense // Sums and results coming in and out of each neuron
+	HiddenNeuronResults *mat64.Dense
+	NeuronOutputSum     *mat64.Dense
+	NeuronOutputResults *mat64.Dense
 }
-
 
 // Helper to grab data from the 3D array of training data
 func Scrape(trainingData [][][]float64) (*mat64.Dense, *mat64.Dense) { // Training data is in the form of a 3D array
 	var inputData, outputData []float64 // Slices of the input and output data
 
-	numOfRows := len(trainingData) // This is the length of the outer array
-	inputColumns := len(trainingData[0][0]) // Length of the input columns
+	numOfRows := len(trainingData)           // This is the length of the outer array
+	inputColumns := len(trainingData[0][0])  // Length of the input columns
 	outputColumns := len(trainingData[0][1]) // Length of output columns, all the inputs and outputs will share this length
 
-	for _, dataSet := range trainingData { // Blank identifier allows me to drop the first return value (think key, value for loops in python) 
+	for _, dataSet := range trainingData { // Blank identifier allows me to drop the first return value (think key, value for loops in python)
 		inputData = append(inputData, dataSet[0]...) // The ... is the syntax for appending one slice to another
-		outputData = append(outputData, dataSet[1]...) 
+		outputData = append(outputData, dataSet[1]...)
 	}
 
 	inputMatrix := mat64.NewDense(numOfRows, inputColumns, inputData)
 	outputMatrix := mat64.NewDense(numOfRows, outputColumns, outputData)
-	
+
 	return inputMatrix, outputMatrix
 }
-
 
 // Helper to randomize weights of synapses
 func Randoms(rows, columns int) *mat64.Dense {
 	rand.Seed(time.Now().UTC().UnixNano()) // Set the starting point for a random number generator
-	randomMatrix := mat64.NewDense(rows, columns, nil) 
+	randomMatrix := mat64.NewDense(rows, columns, nil)
 
 	for row := 0; row < rows; row++ {
 		for col := 0; col < columns; col++ {
@@ -58,17 +56,15 @@ func Randoms(rows, columns int) *mat64.Dense {
 	return randomMatrix
 }
 
-
 // Helper function that applies the sigmoid function to a value
 func Sigmoid(value float64) float64 {
-	return 1 / ( 1 + math.Exp(-value) )
+	return 1 / (1 + math.Exp(-value))
 }
 
 // Helper function that applies the derivative of the sigmiod function to a value
 func SigmoidPrime(value float64) float64 {
 	return Sigmoid(value) * (1 - Sigmoid(value))
 }
-
 
 // Activation function -> currently only uses sigmoid function
 func SigmoidActivate(m *mat64.Dense) *mat64.Dense {
@@ -82,9 +78,8 @@ func SigmoidActivate(m *mat64.Dense) *mat64.Dense {
 		}
 	}
 
-	return activatedMatrix 
+	return activatedMatrix
 }
-
 
 func SigmoidPrimeActivate(m *mat64.Dense) *mat64.Dense {
 	rows, columns := m.Dims()
@@ -100,14 +95,13 @@ func SigmoidPrimeActivate(m *mat64.Dense) *mat64.Dense {
 	return activatedMatrix
 }
 
-
 // Helper function to use forward propagation on the network
 func (a *Alec) ForwardPropagate(inputMatrix *mat64.Dense) {
 	// Propagating from input layer to hidden layer
 	HiddenNeuronSum := &mat64.Dense{}
-	HiddenNeuronSum.Mul(inputMatrix, a.InputSynapses) // Matrix multiply input data through the weights
+	HiddenNeuronSum.Mul(inputMatrix, a.InputSynapses)        // Matrix multiply input data through the weights
 	a.HiddenNeuronResults = SigmoidActivate(HiddenNeuronSum) // Apply sigmoid activation function to sum at each layer
-	
+
 	// Propagating from hidden layer to output layer
 	NeuronOutputSum := &mat64.Dense{}
 	NeuronOutputSum.Mul(a.HiddenNeuronResults, a.OutputSynapses)
@@ -117,23 +111,27 @@ func (a *Alec) ForwardPropagate(inputMatrix *mat64.Dense) {
 	a.NeuronOutputSum = NeuronOutputSum
 }
 
-
 func (a *Alec) BackPropagate(inputMatrix *mat64.Dense, outputMatrix *mat64.Dense) {
 	OutputLayerError := &mat64.Dense{} // Margin of error between actual and predicted results
 	OutputLayerDelta := &mat64.Dense{} // The amount that we have to step back
 
-	InputHiddenChanges := &mat64.Dense{} // Extract the change in each weight from input layer to hidden layer
+	InputHiddenChanges := &mat64.Dense{}  // Extract the change in each weight from input layer to hidden layer
 	OutputHiddenChanges := &mat64.Dense{} // Extract the change in each weight from output layer to hidden layer
 
 	HiddenLayerDelta := &mat64.Dense{}
 
 	// Matrix subtraction between training data and network's output results to get error margin
-	OutputLayerError.Sub(outputMatrix, a.NeuronOutputResults) 
+	OutputLayerError.Sub(outputMatrix, a.NeuronOutputResults)
+
+	// The following process is based off a formula used to determine the changes
+	// in weights required at each layer. These changes in weights are then added
+	// to the original weights to calibrate the network. The formula deals with
+	// the derivative of the activation function and applying it to the changes.
 
 	// Adjusting synapses and neurons from output layer to hidden layer
-	OutputLayerDelta.MulElem(SigmoidPrimeActivate(a.NeuronOutputSum), OutputLayerError)
-	OutputHiddenChanges.Mul(a.HiddenNeuronResults.T(), OutputLayerDelta) // T() transposes a matrix
-	OutputHiddenChanges.Scale(a.LearningRate, OutputHiddenChanges) // Multiply matrix by a scaler
+	OutputLayerDelta.MulElem(SigmoidPrimeActivate(a.NeuronOutputSum), OutputLayerError) // Multiplying by rate of change allows us to get the change of sum
+	OutputHiddenChanges.Mul(a.HiddenNeuronResults.T(), OutputLayerDelta)                // T() transposes a matrix
+	OutputHiddenChanges.Scale(a.LearningRate, OutputHiddenChanges)                      // Multiply matrix by a scaler
 	a.OutputSynapses.Add(OutputHiddenChanges, a.OutputSynapses)
 
 	// Adjusting synapses and neurons from hidden layer to input layer
@@ -143,7 +141,6 @@ func (a *Alec) BackPropagate(inputMatrix *mat64.Dense, outputMatrix *mat64.Dense
 	InputHiddenChanges.Scale(a.LearningRate, InputHiddenChanges)
 	a.InputSynapses.Add(InputHiddenChanges, a.InputSynapses)
 }
-
 
 // Initialize the network
 func Build(learningRate float64, iterations int, hiddenNeurons int) *Alec { // Returns a pointer to Alec struct
@@ -156,7 +153,6 @@ func Build(learningRate float64, iterations int, hiddenNeurons int) *Alec { // R
 	return a
 }
 
-
 func (a *Alec) Train(trainingData [][][]float64) { // Training data is in the form of a 3D array
 	inputMatrix, outputMatrix := Scrape(trainingData)
 
@@ -164,9 +160,9 @@ func (a *Alec) Train(trainingData [][][]float64) { // Training data is in the fo
 	_, numInputColumns := inputMatrix.Dims() // Returns number of rows and cols in a matrix
 	_, numOutputColumns := outputMatrix.Dims()
 
-	// Prep our synapses matrixes 
+	// Prep our synapses matrixes
 	a.InputSynapses = Randoms(numInputColumns, a.HiddenNeurons) // Randoms gives each synapse a random weight
-	a.OutputSynapses = Randoms(a.HiddenNeurons, numOutputColumns) 
+	a.OutputSynapses = Randoms(a.HiddenNeurons, numOutputColumns)
 
 	// Training network with forward and back propagation
 	for i := 0; i < a.NumOfIterations; i++ {
@@ -175,9 +171,8 @@ func (a *Alec) Train(trainingData [][][]float64) { // Training data is in the fo
 	}
 }
 
-
 // Ask a smart alec! This function allows you to make a prediction
-func (a *Alec) Smart(inputData [][]float64) *mat64.Dense {
+func (a *Alec) Predict(inputData [][]float64) *mat64.Dense {
 	var input []float64
 
 	for _, data := range inputData {
