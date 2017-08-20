@@ -111,6 +111,10 @@ func (a *Alec) ForwardPropagate(inputMatrix *mat64.Dense) {
 	a.NeuronOutputSum = NeuronOutputSum
 }
 
+// The following process is based off a formula used to determine the changes
+// in weights required at each layer. These changes in weights are then added
+// to the original weights to calibrate the network. The formula deals with
+// the derivative of the activation function and applying it to the changes.
 func (a *Alec) BackPropagate(inputMatrix *mat64.Dense, outputMatrix *mat64.Dense) {
 	OutputLayerError := &mat64.Dense{} // Margin of error between actual and predicted results
 	OutputLayerDelta := &mat64.Dense{} // The amount that we have to step back
@@ -122,11 +126,6 @@ func (a *Alec) BackPropagate(inputMatrix *mat64.Dense, outputMatrix *mat64.Dense
 
 	// Matrix subtraction between training data and network's output results to get error margin
 	OutputLayerError.Sub(outputMatrix, a.NeuronOutputResults)
-
-	// The following process is based off a formula used to determine the changes
-	// in weights required at each layer. These changes in weights are then added
-	// to the original weights to calibrate the network. The formula deals with
-	// the derivative of the activation function and applying it to the changes.
 
 	// Adjusting synapses and neurons from output layer to hidden layer
 	OutputLayerDelta.MulElem(SigmoidPrimeActivate(a.NeuronOutputSum), OutputLayerError) // Multiplying by rate of change allows us to get the change of sum
