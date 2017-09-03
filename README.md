@@ -35,7 +35,7 @@ func main() {
 }
 ```
 ## Correctness
-A 65.2% correctness was determined for the network when approximating sin(x). This test can be found within the comments of "alec_test.go". Improvements could be made with the amount of training data provided. Also, only the sigmoid activation function is used which may not be the best for training for this purpose. For example, when determing correctness with XOR truth table predictions, the correctness would be 95%+ yet, this is not an accurate representation of the true correctness of the network.
+A 65.2% soft correctness was determined for the network when approximating sin(x). This test can be found within the comments of "alec_test.go". Improvements could be made with the amount of training data provided. Also, only the sigmoid activation function is used which may not be the best for training for this purpose. For example, when determing correctness with XOR truth table predictions, the correctness would be 95%+ yet, this is not an accurate representation of the true correctness of the network.
 
 ## Improvements
 - Allow for different activation functions
