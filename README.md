@@ -1,8 +1,9 @@
-# alec
-Neural Network implementation in Go - Documentation: https://godoc.org/github.com/s4ayub/alec
+<p align="center"><a href="https://godoc.org/github.com/s4ayub/alec" target="_blank"><img width="100"src="https://img.buzzfeed.com/buzzfeed-static/static/2016-09/20/18/enhanced/buzzfeed-prod-fastlane02/enhanced-14627-1474411029-3.png?downsize=715:*&output-format=auto&output-quality=auto"></a></p>
+<h1 align="center">alec</h1>
+<p align="center">Neural Network implementation in Go - Documentation: https://godoc.org/github.com/s4ayub/alec
+</p>
 
-[![Build Status](https://travis-ci.org/s4ayub/alec.svg?branch=master)](https://travis-ci.org/s4ayub/alec)
-
+<p align="center">[![Build Status](https://travis-ci.org/s4ayub/alec.svg?branch=master)](https://travis-ci.org/s4ayub/alec)</p>
 ## Motivation and Features
 This neural network currently allows users to specify a learning rate, the number of iterations for training and the number of units in the hidden layer of the network. Training is faciliated using a backpropagation algorithm. It was made for the purpose of learning basic machine learning concepts under supervised learning. Using Go allowed me to gain more experience with the language before delving into more research intensive projects using it.
 
